@@ -1,0 +1,25 @@
+import os
+
+def add_zeros_to_filename(folder_path):
+    # 获取指定文件夹中的所有文件名
+    file_list = os.listdir(folder_path)
+
+    # 遍历文件列表
+    for filename in file_list:
+        # 构造新的文件名
+        new_filename = filename.split('.')[0].zfill(5) + '.' + filename.split('.')[1]
+        
+        # 构造原文件的完整路径
+        old_filepath = os.path.join(folder_path, filename)
+        
+        # 构造新文件的完整路径
+        new_filepath = os.path.join(folder_path, new_filename)
+
+        # 重命名文件
+        os.rename(old_filepath, new_filepath)
+
+# 指定文件夹路径
+folder_path = 'path/to/your/folder'
+
+# 调用函数进行文件名修改
+add_zeros_to_filename(folder_path)
