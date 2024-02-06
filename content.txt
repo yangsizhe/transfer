@@ -1,25 +1,27 @@
-import os
+import numpy as np
+from scipy.spatial.transform import Rotation as R
 
-def add_zeros_to_filename(folder_path):
-    # 获取指定文件夹中的所有文件名
-    file_list = os.listdir(folder_path)
+def rotation_matrix_to_vector(rotation_matrix):
+    r = R.from_matrix(rotation_matrix)
+    return r.as_rotvec()
 
-    # 遍历文件列表
-    for filename in file_list:
-        # 构造新的文件名
-        new_filename = filename.split('.')[0].zfill(5) + '.' + filename.split('.')[1]
-        
-        # 构造原文件的完整路径
-        old_filepath = os.path.join(folder_path, filename)
-        
-        # 构造新文件的完整路径
-        new_filepath = os.path.join(folder_path, new_filename)
+def rotation_vector_to_matrix(rotation_vector):
+    r = R.from_rotvec(rotation_vector)
+    return r.as_matrix()
 
-        # 重命名文件
-        os.rename(old_filepath, new_filepath)
+def rotation_angle_between_matrices(matrix1, matrix2):
+    vec1 = rotation_matrix_to_vector(matrix1)
+    vec2 = rotation_matrix_to_vector(matrix2)
+    # Compute the angle between the two rotation vectors
+    angle = np.arccos(np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2)))
+    return np.degrees(angle)
 
-# 指定文件夹路径
-folder_path = 'path/to/your/folder'
+# Example usage
+if __name__ == "__main__":
+    # Define two rotation matrices
+    rotation_matrix1 = np.array([[0.707, -0.707, 0], [0.707, 0.707, 0], [0, 0, 1]])
+    rotation_matrix2 = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
 
-# 调用函数进行文件名修改
-add_zeros_to_filename(folder_path)
+    # Calculate the angle between the two rotation matrices
+    angle = rotation_angle_between_matrices(rotation_matrix1, rotation_matrix2)
+    print("Angle between the two rotation matrices:", angle)
