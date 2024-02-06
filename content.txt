@@ -1,27 +1,42 @@
 import numpy as np
-from scipy.spatial.transform import Rotation as R
 
-def rotation_matrix_to_vector(rotation_matrix):
-    r = R.from_matrix(rotation_matrix)
-    return r.as_rotvec()
+def rotation_matrix_to_euler_angles(R):
+    """
+    Convert rotation matrix to Euler angles.
+    """
+    sy = np.sqrt(R[0, 0] * R[0, 0] + R[1, 0] * R[1, 0])
+    singular = sy < 1e-6
+    if not singular:
+        x = np.arctan2(R[2, 1], R[2, 2])
+        y = np.arctan2(-R[2, 0], sy)
+        z = np.arctan2(R[1, 0], R[0, 0])
+    else:
+        x = np.arctan2(-R[1, 2], R[1, 1])
+        y = np.arctan2(-R[2, 0], sy)
+        z = 0
+    return np.array([x, y, z])
 
-def rotation_vector_to_matrix(rotation_vector):
-    r = R.from_rotvec(rotation_vector)
-    return r.as_matrix()
+def angle_between_rotations(R1, R2):
+    """
+    Calculate the angle between two rotation matrices.
+    """
+    # Compute the rotation matrix representing the rotation from R1 to R2
+    R = np.dot(R1.T, R2)
+    # Extract the Euler angles from the rotation matrix
+    angles = rotation_matrix_to_euler_angles(R)
+    # Compute the angle magnitude
+    angle_magnitude = np.linalg.norm(angles)
+    return angle_magnitude
 
-def rotation_angle_between_matrices(matrix1, matrix2):
-    vec1 = rotation_matrix_to_vector(matrix1)
-    vec2 = rotation_matrix_to_vector(matrix2)
-    # Compute the angle between the two rotation vectors
-    angle = np.arccos(np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2)))
-    return np.degrees(angle)
+# Example rotation matrices
+R1 = np.array([[1, 0, 0],
+               [0, 0, -1],
+               [0, 1, 0]])
 
-# Example usage
-if __name__ == "__main__":
-    # Define two rotation matrices
-    rotation_matrix1 = np.array([[0.707, -0.707, 0], [0.707, 0.707, 0], [0, 0, 1]])
-    rotation_matrix2 = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+R2 = np.array([[0, 0, 1],
+               [0, 1, 0],
+               [-1, 0, 0]])
 
-    # Calculate the angle between the two rotation matrices
-    angle = rotation_angle_between_matrices(rotation_matrix1, rotation_matrix2)
-    print("Angle between the two rotation matrices:", angle)
+# Calculate the angle between the two rotation matrices
+angle = angle_between_rotations(R1, R2)
+print("Angle between the two rotation matrices:", np.degrees(angle))
